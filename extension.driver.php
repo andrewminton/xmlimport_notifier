@@ -8,7 +8,6 @@
 	require_once(TOOLKIT . '/class.general.php');
 	
 	require_once(EXTENSIONS . '/xmlimporter/lib/class.xmlimporterhelpers.php');
-	require_once(EXTENSIONS . '/xmlimport_notifier/lib/class.entrycounter.php');
 		
 	class extension_xmlimport_notifier extends Extension
 	{	
@@ -37,6 +36,17 @@
 					'delegate' => 'XMLImporterImportPostRunErrors',
 					'callback' => 'EmailNotifyErrors'
 				),
+				array(
+					'page' => '/system/preferences/',
+					'delegate' => 'AddCustomPreferenceFieldsets',
+					'callback' => 'appendPreferences'
+				),
+				
+				array(
+					'page' => '/system/preferences/',
+					'delegate' => 'Save',
+					'callback' => 'savePreferences'
+				),
 			);
 		}
 		
@@ -46,7 +56,6 @@
 			parent::__construct();
 			//self::EmailNotifier();
 			//var_dump($this->total);
-			
 			
 		}
 		
@@ -102,4 +111,36 @@
 		
 		// Check for Email entry in config for this extension.. if no email Throw notification to page and email the admin account to notify that Importers don't have a specified email address set..
 		
+		public function install()
+		{
+		
+			Symphony::Configuration()->set('email','','xmlimport_notifier');
+			Administration::instance()->saveConfig();
+		
+		}
+		
+		public function uninstall(){
+		
+			Symphony::Configuration()->remove('xmlimport_notifier');			
+			Administration::instance()->saveConfig();
+								
+		}
+		
+		public function savePreferences($context){
+		
+		}
+		
+		public function appendPreferences($context){
+			
+			$fieldset = new XMLElement('fieldset');
+			$fieldset->setAttribute('class', 'settings');
+			$fieldset->appendChild(new XMLElement('legend', __('XMLimport Notifier')));
+			$label = Widget::Label(__('Email Address to notify'));
+			$label->appendChild(Widget::Input('settings[xmlimport_notifier][email]', General::Sanitize(Symphony::Configuration()->get('email', 'xmlimport_notifier'))));
+			
+			$fieldset->appendChild($label);
+			
+			$context['wrapper']->appendChild($fieldset);	
+			
+		}
 	}
