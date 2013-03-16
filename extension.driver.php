@@ -62,7 +62,7 @@
 		public function __entryCreated($context)
 		{	
 			$one = count($context['entry']);
-			EntryCounter::getTotal($one);
+			
 			//
 			//self::totalCount($one);
 		
@@ -71,7 +71,7 @@
 		public function __entryEdited($context)
 		{	
 			$one = count($context['entry']);
-			EntryCounter::getTotal($one);
+			
 			//
 			//self::totalCount($one);
 
