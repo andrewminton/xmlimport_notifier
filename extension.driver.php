@@ -1,6 +1,8 @@
 <?php
 
 	require_once EXTENSIONS.'/xmlimporter/lib/class.xmlimporter.php';
+	require_once(TOOLKIT . '/class.administrationpage.php');
+	require_once(TOOLKIT . '/class.extensionmanager.php');
 	require_once(TOOLKIT . '/class.gateway.php');
 	require_once(TOOLKIT . '/class.fieldmanager.php');
 	require_once(TOOLKIT . '/class.entrymanager.php');
@@ -84,13 +86,24 @@
 			$updated = $context[1];
 			$skipped = $context[2];
 			
-			var_dump($created,$updated,$skipped);
-			if($created >0 || $updated > 0 || $skipped > 0)
+			$email = Symphony::Configuration()->get('email','xmlimport_notifier');
 			
-			{
-				$message = "A total of ".$created." new Entries have been created, ".$updated." entries updated and ".$skipped." entries skipped";
-				$mail = mail('me@localhost', 'My Subject', $message);
-			}
+			if($created >0 || $updated > 0 || $skipped > 0)
+				
+				//Send email with message of Total count of import entries.
+				if($email !='')
+				{
+					$message = "A total of ".$created." new Entries have been created, ".$updated." entries updated and ".$skipped." entries skipped";
+					$mail = mail($email, 'XMLimporter Report', $message);
+				}
+				//Notify Admin of no Email Address being set.
+				else{
+					
+					$message="XMLimport Notifier Email is not set in preferences, no email notification was sent";
+			
+					Administration::instance()->Page->pageAlert($message, Alert::ERROR);
+				
+				}
 		}
 		
 		public function EmailNotifyErrors($context)
